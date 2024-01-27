@@ -1,4 +1,4 @@
-function processResponse(res) {
+export function processResponse(res) {
   let answer = "";
   for (let i of res) {
     if (i["name"] !== "模仿朗读") {
@@ -17,5 +17,3 @@ function processResponse(res) {
   }
   return answer;
 }
-
-export { processResponse };

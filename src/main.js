@@ -1,43 +1,40 @@
 import {processResponse} from "./scripts/parse.js";
-import {createApp} from "vue";
-import ElementPlus from "element-plus";
+import {show_answer_for_paper} from "./scripts/paper.js";
+import {show_answer_for_chooseTranslate, show_setting_for_word} from "./scripts/words.js";
 import "element-plus/dist/index.css"
-import paper from "./components/paper.vue";
-import word from "./components/word.vue";
+import { ElNotification } from "element-plus"
+import {unsafeWindow} from "$";
 
 const hash = window.location.hash;
-
-function show_answer_for_paper() {
-  if (localStorage.getItem(window.location.hash.split("&")[0].split("id=")[1]) === null) {
-    alert("未找到答案，请重新进入当前页面");
-  } else {
-    setTimeout(() => {
-      createApp(paper).use(ElementPlus).mount(
-        (() => {
-          const app = document.createElement("div");
-          document.querySelector("#app > div > div.slider").appendChild(app)
-          return app;
-        })(),
-      );
-    }, 1000)
+// 跳转页面时从此调用
+let old = history.pushState
+history.pushState = function (...arg) {
+  // console.log(arg[2]);
+  if (arg[2].includes("paperDetail")) {
+    show_answer_for_paper();
   }
+  if (arg[2].includes("readingLoudly")) {
+    show_setting_for_word();
+  }
+  return old.call(this, ...arg);
 }
 
-function show_answer_for_chooseTranslate(dict) {
-  for (let index = 0; index < dict.data.length; index++) {
-    const answer = dict["data"][index]["titleType"]["optionsTypeList"]
-    for (let i = 0; i < 4; i++) {
-      if (answer[i]["answer"] === true) {
-        console.log(answer[i]["text"])
-      }
-    }
-  }
+// 进入页面时从此调用
+if (hash.includes("chooseTranslate")) {
+  ElNotification({
+    title: "Error",
+    message: "答案解析失败，请返回后重试",
+    type: "error",
+  })
 }
-
+if (hash.includes("readingLoudly")) {
+  show_setting_for_word();
+}
 if (hash.includes("paperDetail")) {
   show_answer_for_paper();
 }
 
+// XHR劫持
 const originOpen = XMLHttpRequest.prototype.open;
 const oldSend = XMLHttpRequest.prototype.send;
 XMLHttpRequest.prototype.open = function (method, url) {
@@ -58,7 +55,6 @@ XMLHttpRequest.prototype.send = function (data) {
       this.addEventListener("readystatechange", function () {
         if (this.readyState === 4) {
           show_answer_for_chooseTranslate(JSON.parse(this.responseText))
-          alert("答案解析成功，右键->检查->控制台 即可查看")
         }
       });
     }
@@ -66,50 +62,49 @@ XMLHttpRequest.prototype.send = function (data) {
   oldSend.apply(this, arguments);
 };
 
-let old = history.pushState
-history.pushState = function (...arg) {
-  // console.log(arg[2]);
-  if (arg[2].includes("paperDetail")) {
-    show_answer_for_paper();
-  }
-  if (arg[2].includes("readingLoudly")) {
-    show_setting_for_word();
-  }
-  return old.call(this, ...arg);
-}
-
-function show_setting_for_word() {
-  if (localStorage.getItem("next_one_limit") === "undefined") {
-    localStorage.setItem("next_one_limit", "70.00")
-  }
-  setTimeout(() => {
-    createApp(word).use(ElementPlus).mount(
-      (() => {
-        const app = document.createElement("div");
-        app.setAttribute("style", "text-align: center")
-        document.querySelector("#app > div > div.left-menu").appendChild(app)
-        return app;
-      })(),
-    );
-  }, 1000)
-  let old_score = null
-  setInterval(() => {
-    const num = document.querySelector("#app > div > div.read-container > div.ant-spin-nested-loading > div > div > div.top > div:nth-child(1)").innerHTML.split("/")[0]
-    const score = document.querySelector("#app > div > div.read-container > div.ant-spin-nested-loading > div > div > div.ul > div:nth-child(" + num + ") > div.user > div > div.score")
-    if (score) {
-      if (parseFloat(score.innerHTML) === old_score) {
-        console.log("stop")
-      } else {
-        if (parseFloat(score.innerHTML) >= localStorage.getItem("next_one_limit")) {
-          old_score = parseFloat(score.innerHTML)
-          console.log("next")
-          document.querySelector("#app > div > div.read-container > div.ant-spin-nested-loading > div > div > div.tool > div.right > div:nth-child(2)").click()
+// Websocket劫持
+// 来源: https://learn.scriptcat.org/docs/middle/WebSocket%E6%8F%90%E4%BA%A4%E8%BF%94%E5%9B%9E%E5%8A%AB%E6%8C%81/
+const originSocket = unsafeWindow.WebSocket;
+unsafeWindow.WebSocket = function (...args) {
+  let callback = undefined;
+  const ws = new originSocket(...args);
+  ws.onmessage = function (evt) {
+    const proxyEvent = new Proxy(evt, {
+      get: function (target, prop) {
+        let data = target[prop];
+        if (prop === "data") {
+          console.log(data)
+          data = JSON.parse(data)
+          if (JSON.stringify(data).includes("tokenId")) {
+            const old = data["result"]["overall"]
+            const min = data["result"]["rank"] * 0.8;
+            const max = data["result"]["rank"] * 0.9;
+            if (min<old && old<max) {
+              return JSON.stringify(data);
+            }
+            data["result"]["overall"] = (Math.random() * (max - min) + min).toPrecision(2);
+            console.log("分数修改成功\n修改前: "+old.toString()+"\n修改后: "+data["result"]["overall"].toString())
+            ElNotification({
+              title: "Success",
+              message: "分数修改成功\n修改前: "+old.toString()+"\n修改后: "+data["result"]["overall"].toString(),
+              type: "success",
+            })
+            return JSON.stringify(data);
+          }
+          return JSON.stringify(data);
         }
-      }
-    }
-  }, 1000)
-}
-
-if (hash.includes("readingLoudly")) {
-  show_setting_for_word();
-}
+        return JSON.stringify(data);
+      },
+    });
+    callback && callback(proxyEvent);
+  };
+  Object.defineProperty(ws, "onmessage", {
+    get: () => {
+      return callback;
+    },
+    set: (setCall) => {
+      callback = setCall;
+    },
+  });
+  return ws;
+};
