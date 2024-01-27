@@ -1,9 +1,9 @@
 import {processResponse} from "./scripts/parse.js";
-import {createApp} from 'vue';
-import ElementPlus from 'element-plus';
-import 'element-plus/dist/index.css'
-import paper from './components/paper.vue';
-import word from './components/word.vue';
+import {createApp} from "vue";
+import ElementPlus from "element-plus";
+import "element-plus/dist/index.css"
+import paper from "./components/paper.vue";
+import word from "./components/word.vue";
 
 const hash = window.location.hash;
 
@@ -14,7 +14,7 @@ function show_answer_for_paper() {
     setTimeout(() => {
       createApp(paper).use(ElementPlus).mount(
         (() => {
-          const app = document.createElement('div');
+          const app = document.createElement("div");
           document.querySelector("#app > div > div.slider").appendChild(app)
           return app;
         })(),
@@ -25,9 +25,9 @@ function show_answer_for_paper() {
 
 function show_answer_for_chooseTranslate(dict) {
   for (let index = 0; index < dict.data.length; index++) {
-    const answer = dict['data'][index]['titleType']['optionsTypeList']
+    const answer = dict["data"][index]["titleType"]["optionsTypeList"]
     for (let i = 0; i < 4; i++) {
-      if (answer[i]['answer'] === true) {
+      if (answer[i]["answer"] === true) {
         console.log(answer[i]["text"])
       }
     }
@@ -46,7 +46,7 @@ XMLHttpRequest.prototype.open = function (method, url) {
   originOpen.apply(this, arguments);
 };
 XMLHttpRequest.prototype.send = function (data) {
-  if (this._method.toLowerCase() === 'post') {
+  if (this._method.toLowerCase() === "post") {
     if (this._url === "https://app.xiyouyingyu.com/paper/getPaperGroupById") {
       this.addEventListener("readystatechange", function () {
         if (this.readyState === 4) {
@@ -85,7 +85,7 @@ function show_setting_for_word() {
   setTimeout(() => {
     createApp(word).use(ElementPlus).mount(
       (() => {
-        const app = document.createElement('div');
+        const app = document.createElement("div");
         app.setAttribute("style", "text-align: center")
         document.querySelector("#app > div > div.left-menu").appendChild(app)
         return app;
