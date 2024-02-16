@@ -73,19 +73,21 @@ unsafeWindow.WebSocket = function (...args) {
       get: function (target, prop) {
         let data = target[prop];
         if (prop === "data") {
-          console.log(data)
+          // console.log(data)
           data = JSON.parse(data)
-          if (JSON.stringify(data).includes("tokenId")) {
+          if (JSON.stringify(data).includes("tokenId") && localStorage.getItem("modify_switch") === "true") {
+            let auto_modify_limit = JSON.parse(localStorage.getItem("auto_modify_limit"))
             const old = data["result"]["overall"]
-            const min = data["result"]["rank"] * 0.8;
-            const max = data["result"]["rank"] * 0.9;
-            if (min<old && old<max) {
+            const min = data["result"]["rank"] * auto_modify_limit["min"];
+            const max = data["result"]["rank"] * auto_modify_limit["max"];
+            if (old > auto_modify_limit["score"]) {
               return JSON.stringify(data);
             }
             data["result"]["overall"] = (Math.random() * (max - min) + min).toPrecision(2);
             console.log("分数修改成功\n修改前: "+old.toString()+"\n修改后: "+data["result"]["overall"].toString())
             ElNotification({
               title: "Success",
+              duration: 3000,
               message: "分数修改成功\n修改前: "+old.toString()+"\n修改后: "+data["result"]["overall"].toString(),
               type: "success",
             })

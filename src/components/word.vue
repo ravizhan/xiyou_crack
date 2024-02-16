@@ -1,8 +1,8 @@
 <template>
   <div class="setting_blank">
-    <span style="padding-bottom: 5px">设定自动分数阈值</span>
+    <span style="padding-bottom: 5px">设定自动下一个分数阈值</span>
     <el-input-number
-      v-model="num"
+      v-model="score"
       :precision="2"
       :step="0.01"
       :max="100"
@@ -21,12 +21,17 @@
 export default {
   data() {
     return {
-      num: 70.00
+      score: 70.00
+    }
+  },
+  mounted() {
+    if (localStorage.getItem("next_one_limit") !== null) {
+      this.score = localStorage.getItem("next_one_limit")
     }
   },
   methods: {
     setting: function () {
-      localStorage.setItem("next_one_limit",this.num)
+      localStorage.setItem("next_one_limit",this.score)
     }
   }
 }
