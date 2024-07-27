@@ -1,22 +1,9 @@
 <template>
   <div class="side-blank">
-    <el-button
-      @click="answerDialogVisible=true"
-    >
-      参考答案
-    </el-button>
-    <span style="text-align: center">模仿朗读声音</span>
-    <el-button
-      id="btn1"
-      style="margin-left: 0;margin-top: 5px"
-      @click="switch_mute()"
-    >
-      开启
-    </el-button>
-    <span style="text-align: center">自动修改分数</span>
+    <span style="text-align: center;color: black">自动修改分数</span>
     <el-button
       id="btn2"
-      style="margin-left: 0;margin-top: 5px"
+      style="margin-left: 0;margin-top: 20px"
       @click="switch_modify()"
     >
       启用
@@ -28,7 +15,7 @@
       draggable
       align-center
     >
-      <div style="padding-bottom: 10px;text-align: center">
+      <div style="padding-bottom: 25px;text-align: center">
         自动修改分数阈值
       </div>
       <el-row>
@@ -36,7 +23,7 @@
           :span="8"
           style="text-align: center"
         >
-          <div>
+          <div class="tip-text">
             启用修改阈值
           </div>
           <el-input-number
@@ -51,7 +38,9 @@
           :span="8"
           style="text-align: center"
         >
-          <div>最低分数百分比</div>
+          <div class="tip-text">
+            最低分数百分比
+          </div>
           <el-input-number
             v-model="max"
             :precision="1"
@@ -64,7 +53,7 @@
           :span="8"
           style="text-align: center"
         >
-          <div>
+          <div class="tip-text">
             最高分数百分比
           </div>
           <el-input-number
@@ -84,19 +73,6 @@
         </el-button>
       </div>
     </el-dialog>
-    <el-dialog
-      v-model="answerDialogVisible"
-      title="参考答案"
-      width="40%"
-      draggable
-      align-center
-    >
-      <div
-        class="div-style"
-      >
-        {{ answer }}
-      </div>
-    </el-dialog>
   </div>
 </template>
 
@@ -107,14 +83,10 @@ export default {
   data() {
     return {
       modifyDialogVisible: false,
-      answerDialogVisible: false,
       score: 60,
       min: 0.7,
       max: 0.8,
     }
-  },
-  computed: {
-    answer () { return localStorage.getItem(window.location.hash.split("&")[0].split("id=")[1]) }
   },
   mounted() {
     if (localStorage.getItem("auto_modify_limit") !== null) {
@@ -124,7 +96,7 @@ export default {
       this.max = data.max
     }
     if (localStorage.getItem("modify_switch") == null) {
-      localStorage.setItem("modify_switch","false")
+      localStorage.setItem("modify_switch", "false")
     }
     if (localStorage.getItem("modify_switch") === "true") {
       document.getElementById("btn2").innerText = "禁用"
@@ -133,23 +105,14 @@ export default {
     }
   },
   methods: {
-    switch_mute: function () {
-      const dom = document.querySelector("#app > div > div.paper-detail-container > div.content > div > div > div.substance > div > video");
-      dom.muted = dom.muted === false;
-      if (document.getElementById("btn1").innerText === "开启") {
-        document.getElementById("btn1").innerText = "关闭"
-      } else {
-        document.getElementById("btn1").innerText = "开启"
-      }
-    },
     switch_modify: function () {
       if (document.getElementById("btn2").innerText === "启用") {
         document.getElementById("btn2").innerText = "禁用"
         this.modifyDialogVisible = true
-        localStorage.setItem("modify_switch","true")
+        localStorage.setItem("modify_switch", "true")
       } else {
         document.getElementById("btn2").innerText = "启用"
-        localStorage.setItem("modify_switch","false")
+        localStorage.setItem("modify_switch", "false")
         ElNotification({
           title: "Success",
           duration: 2000,
@@ -164,7 +127,7 @@ export default {
         min: this.min,
         max: this.max
       }
-      localStorage.setItem("auto_modify_limit",JSON.stringify(data))
+      localStorage.setItem("auto_modify_limit", JSON.stringify(data))
       this.modifyDialogVisible = false
       ElNotification({
         title: "Success",
@@ -184,10 +147,7 @@ export default {
   margin-top: 10px;
 }
 
-.div-style {
-  white-space: pre-line;
-  overflow: auto;
-  height: 300px;
-  color: black;
+.tip-text {
+  padding-bottom: 15px;
 }
 </style>

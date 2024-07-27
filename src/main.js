@@ -1,5 +1,6 @@
 import {processResponse} from "./scripts/parse.js";
 import {show_answer_for_paper} from "./scripts/paper.js";
+import {show_setting_for_accent} from "./scripts/accent.js";
 import {show_answer_for_chooseTranslate, show_setting_for_word} from "./scripts/words.js";
 import "element-plus/dist/index.css"
 import { ElNotification } from "element-plus"
@@ -15,6 +16,9 @@ history.pushState = function (...arg) {
   }
   if (arg[2].includes("readingLoudly")) {
     show_setting_for_word();
+  }
+  if (arg[2].includes("accentDetail")) {
+    show_setting_for_accent();
   }
   return old.call(this, ...arg);
 }
@@ -32,6 +36,9 @@ if (hash.includes("readingLoudly")) {
 }
 if (hash.includes("paperDetail")) {
   show_answer_for_paper();
+}
+if (hash.includes("accentDetail")) {
+  show_setting_for_accent();
 }
 
 // XHR劫持

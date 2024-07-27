@@ -13,8 +13,8 @@ export default defineConfig({
         namespace: "ravizhan@hotmail.com",
         name: "西柚英语辅助脚本",
         author: "Ravi",
-        version: "0.0.3",
-        description: "实现功能: 一键获取听说作业、单词选择作业答案。更多功能正在添加～",
+        version: "0.0.4",
+        description: "一键修改分数，一键获取答案。更多功能正在添加～",
         match: [
           "https://student.xiyouyingyu.com/*",
         ],
