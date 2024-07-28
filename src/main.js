@@ -1,6 +1,7 @@
 import {processResponse} from "./scripts/parse.js";
 import {show_answer_for_paper} from "./scripts/paper.js";
 import {show_setting_for_accent} from "./scripts/accent.js";
+import {show_answer_for_written} from "./scripts/written.js";
 import {show_answer_for_chooseTranslate, show_setting_for_word} from "./scripts/words.js";
 import "element-plus/dist/index.css"
 import { ElNotification } from "element-plus"
@@ -19,6 +20,9 @@ history.pushState = function (...arg) {
   }
   if (arg[2].includes("accentDetail")) {
     show_setting_for_accent();
+  }
+  if (arg[2].includes("writtenDetail")) {
+    show_answer_for_written();
   }
   return old.call(this, ...arg);
 }
@@ -40,6 +44,9 @@ if (hash.includes("paperDetail")) {
 if (hash.includes("accentDetail")) {
   show_setting_for_accent();
 }
+if (hash.includes("writtenDetail")) {
+  show_answer_for_written();
+}
 
 // XHR劫持
 const originOpen = XMLHttpRequest.prototype.open;
@@ -54,7 +61,14 @@ XMLHttpRequest.prototype.send = function (data) {
     if (this._url === "https://app.xiyouyingyu.com/paper/getPaperGroupById") {
       this.addEventListener("readystatechange", function () {
         if (this.readyState === 4) {
-          localStorage.setItem(data.split("groupId=")[1], processResponse(JSON.parse(this.responseText)["data"]));
+          localStorage.setItem(data.split("groupId=")[1], processResponse(JSON.parse(this.responseText)["data"],1));
+        }
+      });
+    }
+    if (this._url === "https://app.xiyouyingyu.com/write/selectByPrimaryKey") {
+      this.addEventListener("readystatechange", function () {
+        if (this.readyState === 4) {
+          localStorage.setItem(data.split("examId=")[1], processResponse(JSON.parse(this.responseText)["data"],2));
         }
       });
     }
