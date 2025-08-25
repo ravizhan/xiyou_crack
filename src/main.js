@@ -3,8 +3,9 @@ import {show_answer_for_paper} from "./scripts/paper.js";
 import {show_setting_for_accent} from "./scripts/accent.js";
 import {show_answer_for_written} from "./scripts/written.js";
 import {show_answer_for_chooseTranslate, show_setting_for_word} from "./scripts/words.js";
+import {harRecorder} from "./scripts/har-recorder.js";
 import "element-plus/dist/index.css"
-import { ElNotification } from "element-plus"
+import {ElNotification} from "element-plus"
 import {unsafeWindow} from "$";
 
 const hash = window.location.hash;
@@ -27,14 +28,6 @@ history.pushState = function (...arg) {
   return old.call(this, ...arg);
 }
 
-// 进入页面时从此调用
-if (hash.includes("chooseTranslate")) {
-  ElNotification({
-    title: "Error",
-    message: "答案解析失败，请返回后重试",
-    type: "error",
-  })
-}
 if (hash.includes("readingLoudly")) {
   show_setting_for_word();
 }
@@ -51,36 +44,110 @@ if (hash.includes("writtenDetail")) {
 // XHR劫持
 const originOpen = XMLHttpRequest.prototype.open;
 const oldSend = XMLHttpRequest.prototype.send;
+
 XMLHttpRequest.prototype.open = function (method, url) {
   this._url = url;
   this._method = method;
+  this._requestHeaders = {};
+  
+  const originalSetRequestHeader = this.setRequestHeader;
+  this.setRequestHeader = function(name, value) {
+    this._requestHeaders[name] = value;
+    return originalSetRequestHeader.call(this, name, value);
+  };
+  
   originOpen.apply(this, arguments);
 };
+
 XMLHttpRequest.prototype.send = function (data) {
-  if (this._method.toLowerCase() === "post") {
-    if (this._url === "https://app.xiyouyingyu.com/paper/getPaperGroupById") {
-      this.addEventListener("readystatechange", function () {
-        if (this.readyState === 4) {
-          localStorage.setItem(data.split("groupId=")[1], processResponse(JSON.parse(this.responseText)["data"],1));
+  const self = this;
+  
+  this.addEventListener("readystatechange", function () {
+    if (this.readyState === 4) {
+      // 记录原始响应数据到HAR
+      harRecorder.recordRequest(
+        self._method,
+        self._url,
+        self._requestHeaders,
+        data,
+        this.status,
+        self.parseResponseHeaders(self.getAllResponseHeaders()),
+        this.responseText
+      );
+
+      if (self._method.toLowerCase() === "post") {
+        if (self._url === "https://app.xiyouyingyu.com/paper/getPaperGroupById") {
+          localStorage.setItem(data.split("groupId=")[1], processResponse(JSON.parse(this.responseText)["data"], 1));
         }
-      });
+        if (self._url === "https://app.xiyouyingyu.com/write/selectByPrimaryKey") {
+          localStorage.setItem(data.split("examId=")[1], processResponse(JSON.parse(this.responseText)["data"], 2));
+        }
+        if (self._url === "https://app.xiyouyingyu.com/word/findListByIds" || self._url === "https://app.xiyouyingyu.com/word/getWordPush") {
+          show_answer_for_chooseTranslate(JSON.parse(this.responseText));
+        }
+        if (self._url === "https://app.xiyouyingyu.com/entrance/moduleListNew") {
+          const response = JSON.parse(this.responseText);
+          if (Array.isArray(response["data"]["common"])) {
+            for (let i = 0; i < response["data"]["common"].length; i++) {
+              if (response["data"]["common"][i]["isLock"] === 1) {
+                response["data"]["common"][i]["isLock"] = 0;
+              }
+            }
+          }
+          if (Array.isArray(response["data"]["special"])) {
+            for (let i = 0; i < response["data"]["special"].length; i++) {
+              if (response["data"]["special"][i]["isLock"] === 1) {
+                response["data"]["special"][i]["isLock"] = 0;
+              }
+            }
+          }
+          Object.defineProperty(this, "responseText", {
+            get: function () { return JSON.stringify(response); }
+          });
+        }
+        if (self._url === "https://app.xiyouyingyu.com/entrance/getModulesByPid") {
+          const response = JSON.parse(this.responseText);
+          for (let i = 0; i < response["moduleList"].length; i++) {
+            if (response["moduleList"][i]["isLock"] === 1) {
+              response["moduleList"][i]["isLock"] = 0;
+            }
+          }
+          Object.defineProperty(this, "responseText", {
+            get: function () { return JSON.stringify(response); }
+          });
+        }
+        if (self._url === "https://app.xiyouyingyu.com/paperAnswerCount/userPracticeInfo") {
+          const response = JSON.parse(this.responseText);
+          if (response["data"]["expire"] === "1") {
+            response["data"]["expire"] = "0";
+            response["data"]["expireAt"] = "2099-12-31 23:59:59";
+          }
+          Object.defineProperty(this, "responseText", {
+            get: function () { return JSON.stringify(response); }
+          });
+        }
+      }
     }
-    if (this._url === "https://app.xiyouyingyu.com/write/selectByPrimaryKey") {
-      this.addEventListener("readystatechange", function () {
-        if (this.readyState === 4) {
-          localStorage.setItem(data.split("examId=")[1], processResponse(JSON.parse(this.responseText)["data"],2));
-        }
-      });
-    }
-    if (this._url === "https://app.xiyouyingyu.com/word/findListByIds" || this._url === "https://app.xiyouyingyu.com/word/getWordPush") {
-      this.addEventListener("readystatechange", function () {
-        if (this.readyState === 4) {
-          show_answer_for_chooseTranslate(JSON.parse(this.responseText))
-        }
-      });
+  });
+  
+  oldSend.apply(this, arguments);
+};
+
+// 添加解析响应头的辅助方法
+XMLHttpRequest.prototype.parseResponseHeaders = function(headerStr) {
+  const headers = {};
+  if (!headerStr) return headers;
+  
+  const headerPairs = headerStr.split("\u000d\u000a");
+  for (let i = 0; i < headerPairs.length; i++) {
+    const headerPair = headerPairs[i];
+    const index = headerPair.indexOf("\u003a\u0020");
+    if (index > 0) {
+      const key = headerPair.substring(0, index);
+      headers[key] = headerPair.substring(index + 2);
     }
   }
-  oldSend.apply(this, arguments);
+  return headers;
 };
 
 // Websocket劫持
@@ -105,11 +172,11 @@ unsafeWindow.WebSocket = function (...args) {
               return JSON.stringify(data);
             }
             data["result"]["overall"] = (Math.random() * (max - min) + min).toPrecision(2);
-            console.log("分数修改成功\n修改前: "+old.toString()+"\n修改后: "+data["result"]["overall"].toString())
+            console.log("分数修改成功\n修改前: " + old.toString() + "\n修改后: " + data["result"]["overall"].toString())
             ElNotification({
               title: "Success",
               duration: 3000,
-              message: "分数修改成功\n修改前: "+old.toString()+"\n修改后: "+data["result"]["overall"].toString(),
+              message: "分数修改成功\n修改前: " + old.toString() + "\n修改后: " + data["result"]["overall"].toString(),
               type: "success",
             })
             return JSON.stringify(data);
@@ -131,3 +198,6 @@ unsafeWindow.WebSocket = function (...args) {
   });
   return ws;
 };
+
+// 添加HAR记录功能到全局作用域
+window.harRecorder = harRecorder;
