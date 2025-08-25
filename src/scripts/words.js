@@ -23,10 +23,13 @@ export function show_answer_for_chooseTranslate(dict) {
       }
     } catch (e) {
       ElNotification({
-        title: "Success",
-        message: "答案解析成功，右键->检查->控制台 即可查看",
-        type: "success",
+        title: "Error",
+        message: "答案解析失败，右键->检查->控制台 查看错误详情",
+        type: "error",
       })
+      console.log(e)
+      console.log("脚本出现错误，请粘贴 downloadHAR() 到下方并回车")
+      console.log("将下载的 HAR 文件提交至 https://github.com/ravizhan/xiyou_crack/issues")
     }
   }
   ElNotification({

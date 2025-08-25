@@ -49,19 +49,19 @@ XMLHttpRequest.prototype.open = function (method, url) {
   this._url = url;
   this._method = method;
   this._requestHeaders = {};
-  
+
   const originalSetRequestHeader = this.setRequestHeader;
-  this.setRequestHeader = function(name, value) {
+  this.setRequestHeader = function (name, value) {
     this._requestHeaders[name] = value;
     return originalSetRequestHeader.call(this, name, value);
   };
-  
+
   originOpen.apply(this, arguments);
 };
 
 XMLHttpRequest.prototype.send = function (data) {
   const self = this;
-  
+
   this.addEventListener("readystatechange", function () {
     if (this.readyState === 4) {
       // 记录原始响应数据到HAR
@@ -76,68 +76,85 @@ XMLHttpRequest.prototype.send = function (data) {
       );
 
       if (self._method.toLowerCase() === "post") {
-        if (self._url === "https://app.xiyouyingyu.com/paper/getPaperGroupById") {
-          localStorage.setItem(data.split("groupId=")[1], processResponse(JSON.parse(this.responseText)["data"], 1));
-        }
-        if (self._url === "https://app.xiyouyingyu.com/write/selectByPrimaryKey") {
-          localStorage.setItem(data.split("examId=")[1], processResponse(JSON.parse(this.responseText)["data"], 2));
-        }
-        if (self._url === "https://app.xiyouyingyu.com/word/findListByIds" || self._url === "https://app.xiyouyingyu.com/word/getWordPush") {
-          show_answer_for_chooseTranslate(JSON.parse(this.responseText));
-        }
-        if (self._url === "https://app.xiyouyingyu.com/entrance/moduleListNew") {
-          const response = JSON.parse(this.responseText);
-          if (Array.isArray(response["data"]["common"])) {
-            for (let i = 0; i < response["data"]["common"].length; i++) {
-              if (response["data"]["common"][i]["isLock"] === 1) {
-                response["data"]["common"][i]["isLock"] = 0;
+        try {
+          if (self._url === "https://app.xiyouyingyu.com/paper/getPaperGroupById") {
+            localStorage.setItem(data.split("groupId=")[1], processResponse(JSON.parse(this.responseText)["data"], 1));
+          }
+          if (self._url === "https://app.xiyouyingyu.com/write/selectByPrimaryKey") {
+            localStorage.setItem(data.split("examId=")[1], processResponse(JSON.parse(this.responseText)["data"], 2));
+          }
+          if (self._url === "https://app.xiyouyingyu.com/word/findListByIds" || self._url === "https://app.xiyouyingyu.com/word/getWordPush") {
+            show_answer_for_chooseTranslate(JSON.parse(this.responseText));
+          }
+          if (self._url === "https://app.xiyouyingyu.com/entrance/moduleListNew") {
+            const response = JSON.parse(this.responseText);
+            if (Array.isArray(response["data"]["common"])) {
+              for (let i = 0; i < response["data"]["common"].length; i++) {
+                if (response["data"]["common"][i]["isLock"] === 1) {
+                  response["data"]["common"][i]["isLock"] = 0;
+                }
               }
             }
-          }
-          if (Array.isArray(response["data"]["special"])) {
-            for (let i = 0; i < response["data"]["special"].length; i++) {
-              if (response["data"]["special"][i]["isLock"] === 1) {
-                response["data"]["special"][i]["isLock"] = 0;
+            if (Array.isArray(response["data"]["special"])) {
+              for (let i = 0; i < response["data"]["special"].length; i++) {
+                if (response["data"]["special"][i]["isLock"] === 1) {
+                  response["data"]["special"][i]["isLock"] = 0;
+                }
               }
             }
+            Object.defineProperty(this, "responseText", {
+              get: function () {
+                return JSON.stringify(response);
+              }
+            });
           }
-          Object.defineProperty(this, "responseText", {
-            get: function () { return JSON.stringify(response); }
-          });
-        }
-        if (self._url === "https://app.xiyouyingyu.com/entrance/getModulesByPid") {
-          const response = JSON.parse(this.responseText);
-          for (let i = 0; i < response["moduleList"].length; i++) {
-            if (response["moduleList"][i]["isLock"] === 1) {
-              response["moduleList"][i]["isLock"] = 0;
+          if (self._url === "https://app.xiyouyingyu.com/entrance/getModulesByPid") {
+            const response = JSON.parse(this.responseText);
+            for (let i = 0; i < response["moduleList"].length; i++) {
+              if (response["moduleList"][i]["isLock"] === 1) {
+                response["moduleList"][i]["isLock"] = 0;
+              }
             }
+            Object.defineProperty(this, "responseText", {
+              get: function () {
+                return JSON.stringify(response);
+              }
+            });
           }
-          Object.defineProperty(this, "responseText", {
-            get: function () { return JSON.stringify(response); }
-          });
-        }
-        if (self._url === "https://app.xiyouyingyu.com/paperAnswerCount/userPracticeInfo") {
-          const response = JSON.parse(this.responseText);
-          if (response["data"]["expire"] === "1") {
-            response["data"]["expire"] = "0";
-            response["data"]["expireAt"] = "2099-12-31 23:59:59";
+          if (self._url === "https://app.xiyouyingyu.com/paperAnswerCount/userPracticeInfo") {
+            const response = JSON.parse(this.responseText);
+            if (response["data"]["expire"] === "1") {
+              response["data"]["expire"] = "0";
+              response["data"]["expireAt"] = "2099-12-31 23:59:59";
+            }
+            Object.defineProperty(this, "responseText", {
+              get: function () {
+                return JSON.stringify(response);
+              }
+            });
           }
-          Object.defineProperty(this, "responseText", {
-            get: function () { return JSON.stringify(response); }
-          });
+        } catch (e) {
+          ElNotification({
+            title: "Error",
+            message: "答案解析失败，右键->检查->控制台 查看错误详情",
+            type: "error",
+          })
+          console.log(e)
+          console.log("脚本出现错误，请粘贴 downloadHAR() 到下方并回车")
+          console.log("将下载的 HAR 文件提交至 https://github.com/ravizhan/xiyou_crack/issues")
         }
       }
     }
   });
-  
+
   oldSend.apply(this, arguments);
 };
 
 // 添加解析响应头的辅助方法
-XMLHttpRequest.prototype.parseResponseHeaders = function(headerStr) {
+XMLHttpRequest.prototype.parseResponseHeaders = function (headerStr) {
   const headers = {};
   if (!headerStr) return headers;
-  
+
   const headerPairs = headerStr.split("\u000d\u000a");
   for (let i = 0; i < headerPairs.length; i++) {
     const headerPair = headerPairs[i];
