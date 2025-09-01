@@ -2,7 +2,11 @@ import {processResponse} from "./scripts/parse.js";
 import {show_answer_for_paper} from "./scripts/paper.js";
 import {show_setting_for_accent} from "./scripts/accent.js";
 import {show_answer_for_written} from "./scripts/written.js";
-import {show_answer_for_chooseTranslate, show_setting_for_word} from "./scripts/words.js";
+import {
+  show_answer_for_chooseTranslate,
+  show_answer_for_chooseTranslateV2,
+  show_setting_for_word
+} from "./scripts/words.js";
 import {harRecorder} from "./scripts/har-recorder.js";
 import "element-plus/dist/index.css"
 import {ElNotification} from "element-plus"
@@ -79,14 +83,15 @@ XMLHttpRequest.prototype.send = function (data) {
         try {
           if (self._url === "https://app.xiyouyingyu.com/paper/getPaperGroupById") {
             localStorage.setItem(data.split("groupId=")[1], processResponse(JSON.parse(this.responseText)["data"], 1));
-          }
-          if (self._url === "https://app.xiyouyingyu.com/write/selectByPrimaryKey") {
+          } else if (self._url === "https://app.xiyouyingyu.com/write/selectByPrimaryKey") {
             localStorage.setItem(data.split("examId=")[1], processResponse(JSON.parse(this.responseText)["data"], 2));
-          }
-          if (self._url === "https://app.xiyouyingyu.com/word/findListByIds" || self._url === "https://app.xiyouyingyu.com/word/getWordPush") {
-            show_answer_for_chooseTranslate(JSON.parse(this.responseText));
-          }
-          if (self._url === "https://app.xiyouyingyu.com/entrance/moduleListNew") {
+          } else if (self._url === "https://app.xiyouyingyu.com/word/findListByIds" || self._url === "https://app.xiyouyingyu.com/word/getWordPush") {
+            try {
+              show_answer_for_chooseTranslate(JSON.parse(this.responseText));
+            } catch (e) {
+              show_answer_for_chooseTranslateV2(JSON.parse(this.responseText));
+            }
+          } else if (self._url === "https://app.xiyouyingyu.com/entrance/moduleListNew") {
             const response = JSON.parse(this.responseText);
             if (Array.isArray(response["data"]["common"])) {
               for (let i = 0; i < response["data"]["common"].length; i++) {
@@ -107,8 +112,7 @@ XMLHttpRequest.prototype.send = function (data) {
                 return JSON.stringify(response);
               }
             });
-          }
-          if (self._url === "https://app.xiyouyingyu.com/entrance/getModulesByPid") {
+          } else if (self._url === "https://app.xiyouyingyu.com/entrance/getModulesByPid") {
             const response = JSON.parse(this.responseText);
             for (let i = 0; i < response["moduleList"].length; i++) {
               if (response["moduleList"][i]["isLock"] === 1) {
@@ -120,8 +124,7 @@ XMLHttpRequest.prototype.send = function (data) {
                 return JSON.stringify(response);
               }
             });
-          }
-          if (self._url === "https://app.xiyouyingyu.com/paperAnswerCount/userPracticeInfo") {
+          } else if (self._url === "https://app.xiyouyingyu.com/paperAnswerCount/userPracticeInfo") {
             const response = JSON.parse(this.responseText);
             if (response["data"]["expire"] === "1") {
               response["data"]["expire"] = "0";
@@ -132,6 +135,9 @@ XMLHttpRequest.prototype.send = function (data) {
                 return JSON.stringify(response);
               }
             });
+          } else {
+            // 扫描剩余所有请求
+            show_answer_for_chooseTranslateV2(JSON.parse(this.responseText));
           }
         } catch (e) {
           ElNotification({
