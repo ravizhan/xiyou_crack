@@ -4,32 +4,12 @@ import ElementPlus, {ElNotification} from "element-plus";
 
 
 export function show_answer_for_chooseTranslate(dict) {
-  try {
-    for (let index = 0; index < dict.data.length; index++) {
-      const answer = dict["data"][index]["titleType"]["optionsTypeList"]
-      for (let i = 0; i < 4; i++) {
-        if (answer[i]["answer"] === true) {
-          console.log(answer[i]["text"])
-        }
+  for (let index = 0; index < dict.data.length; index++) {
+    const answer = dict["data"][index]["titleType"]["optionsTypeList"]
+    for (let i = 0; i < 4; i++) {
+      if (answer[i]["answer"] === true) {
+        console.log(answer[i]["text"])
       }
-    }
-  } catch (e) {
-    try {
-      const answers = deepsearch(dict, "textBookParaphrase")
-      for (let i = 0; i < answers.length; i++) {
-        if (answers[i] !== null) {
-          console.log(answers[i])
-        }
-      }
-    } catch (e) {
-      ElNotification({
-        title: "Error",
-        message: "答案解析失败，右键->检查->控制台 查看错误详情",
-        type: "error",
-      })
-      console.log(e)
-      console.log("脚本出现错误，请粘贴 downloadHAR() 到下方并回车")
-      console.log("将下载的 HAR 文件提交至 https://github.com/ravizhan/xiyou_crack/issues")
     }
   }
   ElNotification({
@@ -37,6 +17,29 @@ export function show_answer_for_chooseTranslate(dict) {
     message: "答案解析成功，右键->检查->控制台 即可查看",
     type: "success",
   })
+}
+
+export function show_answer_for_chooseTranslateV2(dict) {
+  try {
+    const answers = extractTextbookFromData(dict)
+    if (answers === null) {
+      throw new Error("未找到课文数据")
+    }
+    for (let i = 0; i < answers.length; i++) {
+      if (answers[i] !== null) {
+        console.log(answers[i])
+      }
+    }
+  } catch (e) {
+    ElNotification({
+      title: "Error",
+      message: "答案解析失败，右键->检查->控制台 查看错误详情",
+      type: "error",
+    })
+    console.log(e)
+    console.log("脚本出现错误，请粘贴 downloadHAR() 到下方并回车")
+    console.log("将下载的 HAR 文件提交至 https://github.com/ravizhan/xiyou_crack/issues")
+  }
 }
 
 export function show_setting_for_word() {
@@ -71,21 +74,57 @@ export function show_setting_for_word() {
   }, 1000)
 }
 
-function deepsearch(obj,column) {
-  const results = [];
-  function traverse(item) {
-    if (item === null || typeof item !== 'object') {
-      return;
-    }
-    if (column in item) {
-      results.push(item[column]);
-    }
-    for (const key in item) {
-      if (item.hasOwnProperty(key)) {
-        traverse(item[key]);
+// author: @awaxiaoyu
+function extractTextbookFromData(data) {
+  if (!data || typeof data !== 'object') return null;
+  let result = null;
+  // 递归查找包含textBookParaphrase的数组
+  function findTextbookArrays(obj, path = '') {
+    if (Array.isArray(obj)) {
+      // 检查数组中的元素是否包含textBookParaphrase
+      const hasTextbook = obj.some(item =>
+        item && typeof item === 'object' && item.textBookParaphrase !== undefined
+      );
+
+      if (hasTextbook) {
+        log(`发现课文数据数组: ${path || 'root'}, 长度: ${obj.length}`);
+        result = extractAndOutput(obj);
+      }
+    } else if (typeof obj === 'object' && obj !== null) {
+      for (const [key, value] of Object.entries(obj)) {
+        findTextbookArrays(value, `${path}.${key}`.replace(/^\./, ''));
       }
     }
   }
-  traverse(obj);
-  return results;
+
+  findTextbookArrays(data);
+  return result;
+}
+
+// author: @awaxiaoyu
+function extractAndOutput(textbookArray) {
+  if (!Array.isArray(textbookArray)) return null;
+
+  // 提取关键字段
+  const extracted = textbookArray.map((item, index) => {
+    return {
+      index: index,
+      textBookParaphrase: item.textBookParaphrase || null,
+      textBookParaphraseCn: item.textBookParaphraseCn || null,
+      textBookParaphraseEn: item.textBookParaphraseEn || null,
+      originalText: item.originalText || null,
+      translation: item.translation || null,
+      id: item.id || null,
+      unitId: item.unitId || null,
+      lessonId: item.lessonId || null
+    };
+  }).filter(item => item.textBookParaphrase !== null);
+
+  if (extracted.length > 0) {
+    // 在控制台输出数组
+    console.log('=== 课文数据提取完成 ===');
+    console.log('提取结果数组:', extracted);
+    console.log('数组长度:', extracted.length);
+    return extracted;
+  }
 }
