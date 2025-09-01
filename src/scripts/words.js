@@ -27,10 +27,10 @@ export function show_answer_for_chooseTranslateV2(dict) {
     }
     // 当文档加载完成后执行
     if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', extractWordLists);
+      document.addEventListener('DOMContentLoaded', () => extractWordLists(answers));
     } else {
       // 如果文档已经加载完成，直接执行
-      setTimeout(extractWordLists, 1000); // 延迟1秒执行，确保所有元素都已渲染
+      setTimeout(() => extractWordLists(answers), 1000); // 延迟1秒执行，确保所有元素都已渲染
     }
     ElNotification({
       title: "Success",

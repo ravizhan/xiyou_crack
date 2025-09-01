@@ -99,7 +99,8 @@ XMLHttpRequest.prototype.send = function (data) {
                   response["data"]["common"][i]["isLock"] = 0;
                 }
               }
-            } else if (Array.isArray(response["data"]["special"])) {
+            }
+            if (Array.isArray(response["data"]["special"])) {
               for (let i = 0; i < response["data"]["special"].length; i++) {
                 if (response["data"]["special"][i]["isLock"] === 1) {
                   response["data"]["special"][i]["isLock"] = 0;
