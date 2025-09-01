@@ -10,9 +10,9 @@ export default defineConfig({
       entry: "src/main.js",
       userscript: {
         "run-at": "document-start",
-        namespace: "ravizhan@hotmail.com",
+        namespace: "ravizhan/xiyou_crack",
         name: "西柚英语辅助脚本",
-        author: "Ravi",
+        author: "Ravi & awaxiaoyu",
         version: "0.0.6",
         description: "一键修改分数，一键获取答案。更多功能正在添加～",
         match: [
