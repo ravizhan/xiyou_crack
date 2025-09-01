@@ -3,7 +3,7 @@
 // @namespace    http://tampermonkey.net/
 // @version      1.0
 // @description  专门提取西柚英语课文数据并输出为数组
-// @author       You
+// @author       awaxiaoyu
 // @match        https://student.xiyouyingyu.com/*
 // @grant        unsafeWindow
 // @run-at       document-start
