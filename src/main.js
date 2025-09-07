@@ -138,6 +138,20 @@ XMLHttpRequest.prototype.send = function (data) {
                 return JSON.stringify(response);
               }
             });
+          }else if (self._url === "https://app.xiyouyingyu.com/user/login/account") {
+            const response = JSON.parse(this.responseText);
+            if (response["data"]["userInfo"]["expire"] === "1") {
+              response["data"]["userInfo"]["expire"] = "0";
+              response["data"]["userInfo"]["expireAt"] = "2099-12-31 23:59:59";
+            }
+            if (response["data"]["hasVipCard"] === 0) {
+              response["data"]["hasVipCard"] = 1;
+            }
+            Object.defineProperty(this, "responseText", {
+              get: function () {
+                return JSON.stringify(response);
+              }
+            });
           } else if (self._url === "https://app.xiyouyingyu.com/user/getVipCard") {
             let response = JSON.parse(this.responseText);
             if (response["data"].length === 0) {
