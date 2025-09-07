@@ -29,7 +29,7 @@
       align-center
     >
       <div style="padding-bottom: 10px;text-align: center">
-        自动修改分数阈值
+        自动修改分数设置
       </div>
       <el-row>
         <el-col
@@ -37,7 +37,7 @@
           style="text-align: center"
         >
           <div>
-            启用修改阈值
+            低于多少分才修改
           </div>
           <el-input-number
             v-model="score"
@@ -51,7 +51,7 @@
           :span="8"
           style="text-align: center"
         >
-          <div>最低分数百分比</div>
+          <div>修改后最低分数百分比</div>
           <el-input-number
             v-model="max"
             :precision="1"
@@ -65,7 +65,7 @@
           style="text-align: center"
         >
           <div>
-            最高分数百分比
+            修改后最高分数百分比
           </div>
           <el-input-number
             v-model="min"

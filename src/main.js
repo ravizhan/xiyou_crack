@@ -130,6 +130,49 @@ XMLHttpRequest.prototype.send = function (data) {
               response["data"]["expire"] = "0";
               response["data"]["expireAt"] = "2099-12-31 23:59:59";
             }
+            if (response["data"]["hasVipCard"] === 0) {
+              response["data"]["hasVipCard"] = 1;
+            }
+            Object.defineProperty(this, "responseText", {
+              get: function () {
+                return JSON.stringify(response);
+              }
+            });
+          } else if (self._url === "https://app.xiyouyingyu.com/user/getVipCard") {
+            let response = JSON.parse(this.responseText);
+            if (response["data"].length === 0) {
+              function randomCode() {
+                let t = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890",
+                  a = t.length,
+                  n = "";
+                for (let i = 0; i < 8; i++) n += t.charAt(Math.floor(Math.random() * a));
+                return n
+              }
+              response = {
+                "data":[
+                  {
+                    "code":randomCode(),
+                    "bigGrayPhoto":"http://image.xiyouyingyu.com/product/software/app/21F6D8F15912466AB0D068A4487F2EBE.png",
+                    "city":"-1",
+                    "photo":"http://image.xiyouyingyu.com/product/software/app/1C2AD0043E8F4AC38C56FDF072FD00EB.png",
+                    "remark":"1. 试题权限：此学习卡开放广东高中试题。\n\n2. 有效期：自激活日起730内有效，到期自动失效。\n\n3. 此学习卡为电子资源，一旦激活，不可退回。\n\n4. 学习卡权益仅限本人使用，不可转让，出借或售卖。\n\n5. 在使用过程中有任何问题可在上班期间致电客服电话，我们将会优先处理您的需求。\n\n6. 在使用过程中有任何问题可在APP内提交反馈，您的意见对我们很重要，感谢支持！",
+                    "type":"31062",
+                    "bigPhoto":"http://image.xiyouyingyu.com/product/software/app/50B8A89D27EA4E1CAE24446E29C0466E.png",
+                    "vipExpireDateStr":"2099-12-31",
+                    "grayPhoto":"http://image.xiyouyingyu.com/product/software/app/09BE3A1319A441C185A207F86C5BDC8A.png",
+                    "vipExpireDate":"2099-12-31",
+                    "province":"440000",
+                    "scope":"广东高中",
+                    "grade":"8",
+                    "expire":"0",
+                    "name":"广东高中VIP学习卡",
+                    "shortName":"VIP学习卡",
+                    "status":"1"
+                  }
+                ],
+                "state":"11"
+              }
+            }
             Object.defineProperty(this, "responseText", {
               get: function () {
                 return JSON.stringify(response);
