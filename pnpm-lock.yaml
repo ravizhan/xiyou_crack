@@ -9,15 +9,15 @@ importers:
   .:
     dependencies:
       element-plus:
-        specifier: ^2.11.1
-        version: 2.11.1(vue@3.5.20)
+        specifier: 2.11.3
+        version: 2.11.3(vue@3.5.20)
       vue:
         specifier: ^3.5.20
         version: 3.5.20
     devDependencies:
       '@vitejs/plugin-vue':
         specifier: ^6.0.1
-        version: 6.0.1(vite@7.1.3)(vue@3.5.20)
+        version: 6.0.1(vite@7.1.6)(vue@3.5.20)
       eslint:
         specifier: ^9.34.0
         version: 9.34.0
@@ -31,11 +31,11 @@ importers:
         specifier: ^29.0.0
         version: 29.0.0(@babel/parser@7.28.3)(vue@3.5.20)
       vite:
-        specifier: ^7.1.3
-        version: 7.1.3
+        specifier: 7.1.6
+        version: 7.1.6
       vite-plugin-monkey:
         specifier: ^7.1.2
-        version: 7.1.2(postcss@8.5.6)(vite@7.1.3)
+        version: 7.1.2(postcss@8.5.6)(vite@7.1.6)
 
 packages:
 
@@ -616,8 +616,8 @@ packages:
   domutils@3.2.2:
     resolution: {integrity: sha512-6kZKyUajlDuqlHKVX1w7gyslj9MPIXzIFiz/rGu35uC1wMi+kMhQwGhl4lt9unC9Vb9INnY9Z3/ZA3+FhASLaw==}
 
-  element-plus@2.11.1:
-    resolution: {integrity: sha512-weYFIniyNXTAe9vJZnmZpYzurh4TDbdKhBsJwhbzuo0SDZ8PLwHVll0qycJUxc6SLtH+7A9F7dvdDh5CnqeIVA==}
+  element-plus@2.11.3:
+    resolution: {integrity: sha512-769xsjLR4B9Vf9cl5PDXnwTEdmFJvMgAkYtthdJKPhjVjU3hdAwTJ+gXKiO+PUyo2KWFwOYKZd4Ywh6PHfkbJg==}
     peerDependencies:
       vue: ^3.2.0
 
@@ -1052,6 +1052,10 @@ packages:
     resolution: {integrity: sha512-tX5e7OM1HnYr2+a2C/4V0htOcSQcoSTH9KgJnVvNm5zm/cyEWKJ7j7YutsH9CxMdtOkkLFy2AHrMci9IM8IPZQ==}
     engines: {node: '>=12.0.0'}
 
+  tinyglobby@0.2.15:
+    resolution: {integrity: sha512-j2Zq4NyQYG5XMST4cbs02Ak8iJUdxRM0XI5QyxXuZOzKOINmWurp3smXu3y5wDcJrptwpSjgXHzIQxR0omXljQ==}
+    engines: {node: '>=12.0.0'}
+
   to-regex-range@5.0.1:
     resolution: {integrity: sha512-65P7iz6X5yEr1cwcgvQxbbIw7Uk3gOy5dIdtZ4rDveLqhrdJP+Li/Hx6tyK0NEb+2GCyneCMJiGqrADCSNk8sQ==}
     engines: {node: '>=8.0'}
@@ -1114,8 +1118,8 @@ packages:
       vite:
         optional: true
 
-  vite@7.1.3:
-    resolution: {integrity: sha512-OOUi5zjkDxYrKhTV3V7iKsoS37VUM7v40+HuwEmcrsf11Cdx9y3DIr2Px6liIcZFwt3XSRpQvFpL3WVy7ApkGw==}
+  vite@7.1.6:
+    resolution: {integrity: sha512-SRYIB8t/isTwNn8vMB3MR6E+EQZM/WG1aKmmIUCfDXfVvKfc20ZpamngWHKzAmmu9ppsgxsg4b2I7c90JZudIQ==}
     engines: {node: ^20.19.0 || >=22.12.0}
     hasBin: true
     peerDependencies:
@@ -1468,10 +1472,10 @@ snapshots:
 
   '@types/web-bluetooth@0.0.16': {}
 
-  '@vitejs/plugin-vue@6.0.1(vite@7.1.3)(vue@3.5.20)':
+  '@vitejs/plugin-vue@6.0.1(vite@7.1.6)(vue@3.5.20)':
     dependencies:
       '@rolldown/pluginutils': 1.0.0-beta.29
-      vite: 7.1.3
+      vite: 7.1.6
       vue: 3.5.20
 
   '@vue/compiler-core@3.5.20':
@@ -1674,7 +1678,7 @@ snapshots:
       domelementtype: 2.3.0
       domhandler: 5.0.3
 
-  element-plus@2.11.1(vue@3.5.20):
+  element-plus@2.11.3(vue@3.5.20):
     dependencies:
       '@ctrl/tinycolor': 3.6.1
       '@element-plus/icons-vue': 2.3.2(vue@3.5.20)
@@ -2146,6 +2150,11 @@ snapshots:
       fdir: 6.5.0(picomatch@4.0.3)
       picomatch: 4.0.3
 
+  tinyglobby@0.2.15:
+    dependencies:
+      fdir: 6.5.0(picomatch@4.0.3)
+      picomatch: 4.0.3
+
   to-regex-range@5.0.1:
     dependencies:
       is-number: 7.0.0
@@ -2218,7 +2227,7 @@ snapshots:
 
   util-deprecate@1.0.2: {}
 
-  vite-plugin-monkey@7.1.2(postcss@8.5.6)(vite@7.1.3):
+  vite-plugin-monkey@7.1.2(postcss@8.5.6)(vite@7.1.6):
     dependencies:
       acorn: 8.15.0
       acorn-walk: 8.3.4
@@ -2232,18 +2241,18 @@ snapshots:
       postcss-url: 10.1.3(postcss@8.5.6)
       systemjs: 6.15.1
     optionalDependencies:
-      vite: 7.1.3
+      vite: 7.1.6
     transitivePeerDependencies:
       - postcss
 
-  vite@7.1.3:
+  vite@7.1.6:
     dependencies:
       esbuild: 0.25.9
       fdir: 6.5.0(picomatch@4.0.3)
       picomatch: 4.0.3
       postcss: 8.5.6
       rollup: 4.48.1
-      tinyglobby: 0.2.14
+      tinyglobby: 0.2.15
     optionalDependencies:
       fsevents: 2.3.3
 

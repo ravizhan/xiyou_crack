@@ -2,11 +2,12 @@ import {processResponse} from "./scripts/parse.js";
 import {show_answer_for_paper} from "./scripts/paper.js";
 import {show_setting_for_accent} from "./scripts/accent.js";
 import {show_answer_for_written} from "./scripts/written.js";
+import {show_setting_for_word} from "./scripts/words.js";
 import {
-  show_answer_for_chooseTranslate,
-  show_answer_for_chooseTranslateV2,
-  show_setting_for_word
-} from "./scripts/words.js";
+  parse_answer_for_chooseTranslate,
+  parse_answer_for_chooseTranslateV2,
+  show_setting_for_translate
+} from "./scripts/translate.js";
 import {harRecorder} from "./scripts/har-recorder.js";
 import "element-plus/dist/index.css"
 import {ElNotification} from "element-plus"
@@ -29,6 +30,9 @@ history.pushState = function (...arg) {
   if (arg[2].includes("writtenDetail")) {
     show_answer_for_written();
   }
+  if (arg[2].includes("chooseTranslate")) {
+    show_setting_for_translate();
+  }
   return old.call(this, ...arg);
 }
 
@@ -43,6 +47,9 @@ if (hash.includes("accentDetail")) {
 }
 if (hash.includes("writtenDetail")) {
   show_answer_for_written();
+}
+if (hash.includes("chooseTranslate")) {
+  show_setting_for_translate();
 }
 
 // XHR劫持
@@ -87,9 +94,9 @@ XMLHttpRequest.prototype.send = function (data) {
             localStorage.setItem(data.split("examId=")[1], processResponse(JSON.parse(this.responseText)["data"], 2));
           } else if (self._url === "https://app.xiyouyingyu.com/word/findListByIds" || self._url === "https://app.xiyouyingyu.com/word/getWordPush") {
             try {
-              show_answer_for_chooseTranslate(JSON.parse(this.responseText));
+              parse_answer_for_chooseTranslate(JSON.parse(this.responseText));
             } catch (e) {
-              show_answer_for_chooseTranslateV2(JSON.parse(this.responseText));
+              parse_answer_for_chooseTranslateV2(JSON.parse(this.responseText));
             }
           } else if (self._url === "https://app.xiyouyingyu.com/entrance/moduleListNew") {
             const response = JSON.parse(this.responseText);
@@ -194,7 +201,7 @@ XMLHttpRequest.prototype.send = function (data) {
             });
           } else {
             // 扫描剩余所有请求
-            show_answer_for_chooseTranslateV2(JSON.parse(this.responseText));
+            parse_answer_for_chooseTranslateV2(JSON.parse(this.responseText));
           }
         } catch (e) {
           ElNotification({
