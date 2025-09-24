@@ -13,7 +13,7 @@ export default defineConfig({
         namespace: "ravizhan/xiyou_crack",
         name: "西柚英语辅助脚本",
         author: "Ravi & awaxiaoyu",
-        version: "0.0.8",
+        version: "0.0.9",
         description: "一键修改分数，一键获取答案，VIP破解。",
         match: [
           "https://student.xiyouyingyu.com/*",
